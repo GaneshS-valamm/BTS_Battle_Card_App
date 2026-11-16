@@ -1,4 +1,4 @@
-/* One search box over everything Abhay knows (cards, KB, offers, objections, facts, pitches,
+/* One search box over everything VHumans knows (cards, KB, offers, objections, facts, pitches,
    hand-offs) plus the entity directory for company stems such as "HDFC". */
 import type { Content, Ent } from "./types";
 

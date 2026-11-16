@@ -11,7 +11,7 @@ export default function Company() {
     <section className="view">
       <div className="eyebrow">Find by company</div>
       <h2>Who are you talking to?</h2>
-      <p className="lead">Type the company name or its website. Abhay works out what they do and picks the scenarios.</p>
+      <p className="lead">Type the company name or its website. VHumans works out what they do and picks the scenarios.</p>
       <label className="field" htmlFor="c-name">
         <span>Company name or website</span>
         <input type="text" id="c-name" value={name} placeholder="Apollo Hospitals, or apollohospitals.com" autoComplete="off" autoCapitalize="words" enterKeyHint="search"

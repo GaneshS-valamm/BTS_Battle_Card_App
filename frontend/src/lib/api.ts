@@ -1,20 +1,22 @@
 import type { AppConfig, CompanyGuess, Content, PhotoId, ReportResponse } from "./types";
 
-const BASE = (import.meta.env.VITE_API_BASE as string | undefined) || "";
-const KEY_STORE = "abhay.key";
+// Backend origin when the frontend is hosted separately (e.g. https://bts-battle-card-app-backend.onrender.com).
+// Empty = same origin (local dev proxy, or backend serving the built app).
+const BASE = ((import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || "") as string).trim().replace(/\/+$/, "");
+const KEY_STORE = "vhumans.key";
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }
 
-function accessKey(): string { try { return localStorage.getItem(KEY_STORE) || ""; } catch { return ""; } }
+function accessKey(): string { try { return localStorage.getItem(KEY_STORE) || localStorage.getItem("abhay.key") /* old name, kept for existing devices */ || ""; } catch { return ""; } }
 export function setAccessKey(k: string) { try { localStorage.setItem(KEY_STORE, k); } catch { /* storage blocked */ } }
 
 async function req<T>(path: string, init: RequestInit = {}, timeoutMs = 120000): Promise<T> {
   const ctl = new AbortController();
   const to = setTimeout(() => ctl.abort(), timeoutMs);
   const headers: Record<string, string> = { ...(init.headers as Record<string, string>) };
-  const k = accessKey(); if (k) headers["x-abhay-key"] = k;
+  const k = accessKey(); if (k) headers["x-vhumans-key"] = k;
   try {
     const r = await fetch(BASE + path, { ...init, headers, signal: ctl.signal });
     const j = await r.json().catch(() => ({}));
@@ -26,7 +28,7 @@ async function req<T>(path: string, init: RequestInit = {}, timeoutMs = 120000):
     return j as T;
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    throw new ApiError(0, "network", (e as Error).name === "AbortError" ? "The request took too long." : "Could not reach the Abhay server.");
+    throw new ApiError(0, "network", (e as Error).name === "AbortError" ? "The request took too long." : "Could not reach the VHumans server.");
   } finally { clearTimeout(to); }
 }
 

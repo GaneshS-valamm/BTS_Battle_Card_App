@@ -20,7 +20,7 @@ function Shell() {
           <div className="wrap">
             <button className="chipbtn" type="button" aria-label="Go back" onClick={back}>&#8592; Back</button>
             <div className="brand">
-              {view === "report" ? <b>Abhay</b> : (
+              {view === "report" ? <b>VHumans</b> : (
                 <button type="button" className="mibtn" onClick={() => openReport()} aria-label="Market Insight Report">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>
                   Market Insight
@@ -55,14 +55,14 @@ function Boot({ children }: { children: (D: Content, cfg: AppConfig) => React.Re
     setErr(null);
     Promise.all([api.content(), api.config()])
       .then(([d, c]) => { setD(d); setCfg(c); })
-      .catch((e) => setErr(e instanceof ApiError && e.status === 401 ? { msg: "This app needs the team access key.", key: true } : { msg: e instanceof Error ? e.message : "Could not load Abhay." }));
+      .catch((e) => setErr(e instanceof ApiError && e.status === 401 ? { msg: "This app needs the team access key.", key: true } : { msg: e instanceof Error ? e.message : "Could not load VHumans." }));
   };
   useEffect(load, []);
   if (D && cfg) return <>{children(D, cfg)}</>;
   return (
     <main className="app wrap">
       <section className="view" style={{ paddingTop: 60, textAlign: "center" }}>
-        <h1>Abhay</h1>
+        <h1>VHumans</h1>
         {err ? (
           <>
             <div className="banner warn" style={{ textAlign: "left" }}><b>{err.msg}</b></div>

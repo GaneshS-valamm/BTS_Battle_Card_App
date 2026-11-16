@@ -133,11 +133,11 @@ export default function Start() {
       </div>
       <div className="hero">
         <div className="eyebrow">VirtualizingHumans.AI Battle Card</div>
-        <h1>Ask Abhay</h1>
+        <h1>Ask VHumans</h1>
       </div>
       <div className="searchbox">
         <SearchIcon />
-        <input ref={inRef} type="search" value={q} placeholder="Search, or enter company / URL…" autoComplete="off" autoCapitalize="off" spellCheck={false} enterKeyHint="search" aria-label="Search Abhay"
+        <input ref={inRef} type="search" value={q} placeholder="Search, or enter company / URL…" autoComplete="off" autoCapitalize="off" spellCheck={false} enterKeyHint="search" aria-label="Search VHumans"
           onChange={(e) => setQ(e.target.value)} onFocus={() => { setHistState(getHist()); setFocus(true); }} onBlur={() => setTimeout(() => setFocus(false), 200)} onKeyDown={onKey} />
         {qt ? <button className="clr" type="button" aria-label="Clear search" onClick={() => { setQ(""); inRef.current?.focus(); }}>&times;</button> : null}
       </div>
