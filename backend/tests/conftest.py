@@ -9,6 +9,7 @@ if TMP.exists():
 os.environ["DATABASE_URL"] = ""
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["AI_VERTEX_PROJECT"] = ""
+os.environ["AI_VERTEX_API_KEY"] = ""
 os.environ["APP_ACCESS_KEY"] = ""
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 

@@ -51,6 +51,7 @@ def test_health_and_content(client):
 
 def test_not_configured_returns_503():
     object.__setattr__(settings, "vertex_project", "")
+    object.__setattr__(settings, "vertex_api_key", "")
     with TestClient(app) as c:
         r = c.post("/api/company-check", json={"name": "Acme"})
         assert r.status_code == 503 and r.json()["detail"] == "llm_not_configured"

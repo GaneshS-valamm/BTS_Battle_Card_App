@@ -31,7 +31,7 @@ log = logging.getLogger("abhay")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    log.info("Database ready (%s). LLM configured: %s", "sqlite" if settings.is_sqlite else "postgresql", settings.llm_configured)
+    log.info("Database ready (%s). LLM: %s", "sqlite" if settings.is_sqlite else "postgresql", settings.llm_auth or "not configured")
     yield
 
 

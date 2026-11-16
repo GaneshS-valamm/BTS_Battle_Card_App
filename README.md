@@ -69,15 +69,16 @@ Or build once and let FastAPI serve everything at http://localhost:8000: `cd fro
 
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB      # Render PostgreSQL (external URL locally, internal URL on Render)
+AI_VERTEX_API_KEY=AQ....                              # Vertex AI API key; used first when set
 AI_PROVIDER=gemini
 AI_DEFAULT_MODEL=gemini-2.5-flash
-AI_VERTEX_PROJECT=project-8ce5ae3e-81f4-4585-b74
+AI_VERTEX_PROJECT=project-8ce5ae3e-81f4-4585-b74     # used with ADC only when no API key is set
 AI_VERTEX_LOCATION=asia-south1
 AI_TEMPERATURE=0.4
 LLM_WEB_SEARCH=true                                   # Google Search grounding
 ```
 
-AI follows `bts/AI_INTEGRATION.md`: `genai.Client(vertexai=True, project, location)` with Application Default Credentials, no API key. Locally run `gcloud auth application-default login` once with an account that has Vertex AI User on the project. If Google reports quota or "API not enabled": `gcloud auth application-default set-quota-project project-8ce5ae3e-81f4-4585-b74`.
+AI credentials, in order: `AI_VERTEX_API_KEY` → `genai.Client(vertexai=True, api_key=...)` (no gcloud login, works on Render as a plain env var; the key's account needs the Vertex AI User role). Otherwise, as in `bts/AI_INTEGRATION.md`: `genai.Client(vertexai=True, project, location)` with Application Default Credentials. Locally run `gcloud auth application-default login` once with an account that has Vertex AI User on the project. If Google reports quota or "API not enabled": `gcloud auth application-default set-quota-project project-8ce5ae3e-81f4-4585-b74`.
 
 What uses the model: the company check for unknown companies, "Suggest more companies", **photo identification** (Gemini reads the logo and text, then confirms the company with Google Search; the result is cached as a company check), and the Market Insight Report (only after the token confirmation). Without AI the app still works and says so.
 
@@ -89,7 +90,7 @@ Run the frontend with `npm run dev -- --host 0.0.0.0` and open `http://<PC Wi-Fi
 
 ### Vertex AI on Render
 
-Render is not Google Cloud, so there is no attached service account. Options: (1) a Workload Identity Federation credential file for Render, or (2) a service-account key file uploaded as a Render Secret File with `GOOGLE_APPLICATION_CREDENTIALS` pointing at it. The bts docs say the org policy forbids downloaded keys, so agree option 1 (or an exception) with whoever owns the Google project. Alternatively host the app on Cloud Run next to the Valamm AI gateway.
+Simplest: set `AI_VERTEX_API_KEY` in the Render dashboard (it is `sync: false` in `render.yaml`). Without a key, Render is not Google Cloud, so there is no attached service account. Options: (1) a Workload Identity Federation credential file for Render, or (2) a service-account key file uploaded as a Render Secret File with `GOOGLE_APPLICATION_CREDENTIALS` pointing at it. The bts docs say the org policy forbids downloaded keys, so agree option 1 (or an exception) with whoever owns the Google project. Alternatively host the app on Cloud Run next to the Valamm AI gateway.
 
 ## Tests
 

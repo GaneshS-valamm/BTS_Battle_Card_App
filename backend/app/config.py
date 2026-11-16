@@ -44,7 +44,9 @@ class Settings:
     ai_provider: str = field(default_factory=lambda: (os.getenv("AI_PROVIDER") or "gemini").strip().lower())
     vertex_project: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_PROJECT") or "").strip())
     vertex_location: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_LOCATION") or "global").strip())
-    # Optional alternative: Gemini Developer API key (used only when no Vertex project is set)
+    # Vertex AI API key (express mode, "AQ." keys). When set it is used instead of project + ADC.
+    vertex_api_key: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_API_KEY") or "").strip())
+    # Optional alternative: Gemini Developer API key (used only when no Vertex key or project is set)
     gemini_api_key: str = field(default_factory=lambda: (os.getenv("GEMINI_API_KEY") or "").strip())
     llm_model: str = field(default_factory=lambda: (os.getenv("AI_DEFAULT_MODEL") or os.getenv("LLM_MODEL") or "gemini-2.5-flash").strip())
     temperature: float = field(default_factory=lambda: float(os.getenv("AI_TEMPERATURE") or 0.4))
@@ -60,7 +62,16 @@ class Settings:
 
     @property
     def llm_configured(self) -> bool:
-        return self.ai_provider == "gemini" and bool(self.vertex_project or self.gemini_api_key)
+        return self.ai_provider == "gemini" and bool(self.vertex_api_key or self.vertex_project or self.gemini_api_key)
+
+    @property
+    def llm_auth(self) -> str:
+        """Which credentials the AI client uses: 'vertex-key', 'vertex-adc', 'gemini-key' or ''."""
+        if self.vertex_api_key:
+            return "vertex-key"
+        if self.vertex_project:
+            return "vertex-adc"
+        return "gemini-key" if self.gemini_api_key else ""
 
     @property
     def is_sqlite(self) -> bool:

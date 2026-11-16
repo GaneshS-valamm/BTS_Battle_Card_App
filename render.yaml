@@ -21,6 +21,10 @@ services:
       - key: DATABASE_URL
         sync: false
       # AI: Gemini on Vertex AI (see bts/AI_INTEGRATION.md)
+      # Vertex AI API key: paste it in the Render dashboard (never commit it). When set, it is used
+      # instead of GOOGLE_APPLICATION_CREDENTIALS below.
+      - key: AI_VERTEX_API_KEY
+        sync: false
       - key: AI_PROVIDER
         value: gemini
       - key: AI_DEFAULT_MODEL
