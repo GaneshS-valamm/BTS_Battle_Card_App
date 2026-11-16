@@ -1,8 +1,8 @@
-# Abhay — VirtualizingHumans.AI battle card
+# VHumans — VirtualizingHumans.AI battle card
 
 Internal sales and onboarding companion for Valamm.AI and VirtualizingHumans.AI. A seller types a company (or photographs a name board), adds the person, and gets a three-page battle card, with an optional AI-written Market Insight Report.
 
-Built from `Abhay_App.html` (the mockup and reference implementation) and `VirtualizingHumans_Abhay_Battle_Card.pptx` (the master content), following the developer handoff document.
+Built from `VHumans_App.html` (the mockup and reference implementation) and `VirtualizingHumans_VHumans_Battle_Card.pptx` (the master content), following the developer handoff document.
 
 ## Stack
 

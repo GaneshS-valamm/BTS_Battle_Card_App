@@ -28,7 +28,7 @@ def _int(name: str, default: int) -> int:
 def _database_url() -> str:
     url = (os.getenv("DATABASE_URL") or "").strip()
     if not url:
-        return f"sqlite:///{(BACKEND_DIR / 'abhay.db').as_posix()}"
+        return f"sqlite:///{(BACKEND_DIR / 'vhumans.db').as_posix()}"
     # Render and Heroku hand out postgres:// URLs; SQLAlchemy needs the driver named.
     if url.startswith("postgres://"):
         url = "postgresql+psycopg://" + url[len("postgres://"):]

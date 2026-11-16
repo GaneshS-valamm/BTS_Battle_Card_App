@@ -137,7 +137,7 @@ function PickCompany() {
     <section className="view">
       <div className="eyebrow">Market Insight Report</div>
       <h2>Which company?</h2>
-      <p className="lead">Type the company name or its website. Abhay asks before using any AI tokens.</p>
+      <p className="lead">Type the company name or its website. VHumans asks before using any AI tokens.</p>
       <label className="field" htmlFor="r-co">
         <span>Company name or website</span>
         <input id="r-co" type="text" value={q} autoFocus autoComplete="off" placeholder="For example, Infosys or infosys.com" enterKeyHint="go"

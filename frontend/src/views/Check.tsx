@@ -21,7 +21,7 @@ function AiBox() {
         <div className="banner">
           <b>What they do:</b> {ai.what}{ai.hq ? ` (${ai.hq})` : ""}
           <div className="sub">
-            {lowConf ? "Low confidence: Abhay could not place this one clearly. " : ""}
+            {lowConf ? "Low confidence: VHumans could not place this one clearly. " : ""}
             {ai.live ? (
               <>From a live web search.{ai.sources && ai.sources.length ? <> Sources: {ai.sources.map((x, i) => <span key={x.url}>{i ? " · " : ""}<a href={x.url} target="_blank" rel="noopener noreferrer">{(x.title || x.url).slice(0, 40)}</a></span>)}</> : null} Confirm it when you speak to them.</>
             ) : "This comes from Gemini’s general knowledge of public information, not a live web search. Confirm it when you speak to them."}
@@ -30,9 +30,9 @@ function AiBox() {
       ) : ai && ai.ai ? (
         <div className="banner"><b>Could not place {p?.display || "this company"}.</b> Add one line about them below, or pick the type yourself.</div>
       ) : ai && ai.notConfigured ? (
-        <div className="banner warn"><b>The AI lookup is not set up yet.</b> Abhay used the name and website words only. Open their public profile below, paste what they do, and tap Analyse.</div>
+        <div className="banner warn"><b>The AI lookup is not set up yet.</b> VHumans used the name and website words only. Open their public profile below, paste what they do, and tap Analyse.</div>
       ) : (
-        <div className="banner warn"><b>{ai?.error ? "The AI lookup failed: " + ai.error : "Abhay could not look this company up."}</b> It used the name and website words only. Open their public profile below, paste what they do, and tap Analyse.</div>
+        <div className="banner warn"><b>{ai?.error ? "The AI lookup failed: " + ai.error : "VHumans could not look this company up."}</b> It used the name and website words only. Open their public profile below, paste what they do, and tap Analyse.</div>
       )}
       {ai && ai.sugg.length ? (
         <>
@@ -91,7 +91,7 @@ export default function Check() {
         ) : r.top ? (
           <><b>Looks like {IND_LABEL[r.top.ind]}.</b> Matched on {r.top.why.map((w) => "“" + w + "”").join(", ")}. Change it below if that is wrong.{r.known ? " This is treated as an established company, so AWS credits (startups only) are not shown." : ""}</>
         ) : (
-          <><b>Not in Abhay’s list of known companies.</b> See what Abhay found below, and change anything that is wrong.</>
+          <><b>Not in VHumans’s list of known companies.</b> See what VHumans found below, and change anything that is wrong.</>
         )}
       </div>
       <AiBox />

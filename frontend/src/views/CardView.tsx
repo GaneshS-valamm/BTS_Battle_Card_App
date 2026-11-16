@@ -109,7 +109,7 @@ function Compass({ c }: { c: Card }) {
         company: s.ctx.company || "", person: s.ctx.person || "", designation: s.ctx.designation || "", cardId: c.id, cardName: c.name,
         heard: (c.listen || []).filter((_, i) => heard[i]).map((l) => splitListen(l).heard), asked, notes: s.notes, summary: sum,
       });
-      setSaved("Saved to the Abhay log. Still paste it into Compass today.");
+      setSaved("Saved to the VHumans log. Still paste it into Compass today.");
     } catch { setSaved("Could not save right now. Copy the summary instead."); }
   }
   return (
@@ -122,7 +122,7 @@ function Compass({ c }: { c: Card }) {
         </label>
         <label className="field" htmlFor="x-sum"><span>Summary to paste into Compass</span><textarea id="x-sum" readOnly value={sum} /></label>
         <CopyBtn text={sum} label="Copy the summary" />
-        <button className="copy" type="button" onClick={save}>Save to Abhay log</button>
+        <button className="copy" type="button" onClick={save}>Save to VHumans log</button>
         {saved ? <p className="note">{saved}</p> : null}
       </details>
     </Sec>

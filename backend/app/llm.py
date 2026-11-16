@@ -28,7 +28,7 @@ from google.genai import errors, types
 
 from .config import settings
 
-log = logging.getLogger("abhay.llm")
+log = logging.getLogger("vhumans.llm")
 
 
 class LLMNotConfigured(RuntimeError):

@@ -2,7 +2,7 @@
 # Docs: https://render.com/docs/blueprint-spec
 services:
   - type: web
-    name: abhay
+    name: vhumans
     runtime: python
     plan: starter
     buildCommand: >-
@@ -17,7 +17,7 @@ services:
         value: 22.12.0
       # PostgreSQL connection string: paste the database's INTERNAL URL in the Render dashboard
       # (never commit it). Or replace with:
-      #   fromDatabase: { name: abhay-db, property: connectionString }
+      #   fromDatabase: { name: vhumans-db, property: connectionString }
       - key: DATABASE_URL
         sync: false
       # AI: Gemini on Vertex AI (see bts/AI_INTEGRATION.md)
@@ -53,6 +53,6 @@ services:
 
 # Uncomment to let Render create the database too:
 # databases:
-#   - name: abhay-db
+#   - name: vhumans-db
 #     plan: basic-256mb
-#     databaseName: abhay
+#     databaseName: vhumans

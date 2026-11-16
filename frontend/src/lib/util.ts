@@ -80,10 +80,10 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 }
 
 /* Search history: remembered on this phone when the browser allows it, otherwise for this visit. */
-const HKEY = "abhay.history";
+const HKEY = "vhumans.history"; // was "abhay.history"; still read below so existing devices keep their history
 let memHist: string[] = [];
 export function getHist(): string[] {
-  try { const v = JSON.parse(localStorage.getItem(HKEY) || "[]"); if (Array.isArray(v)) memHist = v.map(String); } catch { /* storage blocked */ }
+  try { const v = JSON.parse(localStorage.getItem(HKEY) || localStorage.getItem("abhay.history") || "[]"); if (Array.isArray(v)) memHist = v.map(String); } catch { /* storage blocked */ }
   return memHist.slice();
 }
 export function setHist(a: string[]) { memHist = a.slice(0, 30); try { localStorage.setItem(HKEY, JSON.stringify(memHist)); } catch { /* storage blocked */ } }

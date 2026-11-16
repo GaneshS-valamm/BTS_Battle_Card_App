@@ -1,4 +1,4 @@
-"""Abhay API (FastAPI). Serves the content, the AI features and, in production, the built
+"""VHumans API (FastAPI). Serves the content, the AI features and, in production, the built
 React app from frontend/dist so the whole product runs as one Render web service."""
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from .database import get_db, init_db
 from .models import CompanyCheck, ConversationLog, MarketReport
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("abhay")
+log = logging.getLogger("vhumans")
 
 
 @asynccontextmanager
@@ -40,14 +40,14 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Abhay API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="VHumans API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 if settings.cors_origins:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["content-type", "x-abhay-key"],
+        allow_headers=["content-type", "x-vhumans-key"],
     )
 
 
@@ -57,7 +57,7 @@ async def access_key_guard(request: Request, call_next):
     # CORS preflights (OPTIONS) never carry the key; let them through so the browser can send the real call.
     if (settings.app_access_key and request.method != "OPTIONS"
             and request.url.path.startswith("/api/") and request.url.path != "/api/health"):
-        if request.headers.get("x-abhay-key") != settings.app_access_key:
+        if request.headers.get("x-vhumans-key") != settings.app_access_key:
             return JSONResponse({"error": "unauthorised", "detail": "Missing or wrong access key."}, status_code=401)
     return await call_next(request)
 
