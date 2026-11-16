@@ -36,11 +36,11 @@ def client(monkeypatch):
         return llm.LLMResult(text=json.dumps({"recognised": True, "what": "Makes rockets", "industry": "manufacturing", "security_vendor": False, "type": "startup", "confidence": "high", "hq": "Pune"}))
 
     monkeypatch.setattr(llm, "ask", fake_ask)
-    object.__setattr__(settings, "vertex_project", "test-key")
+    object.__setattr__(settings, "vertex_api_key", "test-key")
     with TestClient(app) as c:
         c.calls = calls
         yield c
-    object.__setattr__(settings, "vertex_project", "")
+    object.__setattr__(settings, "vertex_api_key", "")
 
 
 def test_health_and_content(client):

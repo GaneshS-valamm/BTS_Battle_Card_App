@@ -1,10 +1,11 @@
 """Gemini on Vertex AI (official `google-genai` SDK), following the Valamm AI gateway's rules
 (bts/AI_INTEGRATION.md): thinking-token headroom, retries, no long dashes.
 
-Credentials, in order: AI_VERTEX_API_KEY (Vertex AI API key), else AI_VERTEX_PROJECT with
-Application Default Credentials, else GEMINI_API_KEY (Gemini Developer API).
+Authentication: a Vertex AI API key (AI_VERTEX_API_KEY) only. Application Default Credentials
+are never used, so a missing key cannot turn into a DefaultCredentialsError on the server.
+AI_VERTEX_PROJECT / AI_VERTEX_LOCATION, when set, route the call to that project and region.
 
-Every AI feature goes through `ask()`. When none of those is set, `ask()` raises
+Every AI feature goes through `ask()`. When the key is not set, `ask()` raises
 LLMNotConfigured and the API answers 503 with {"error": "llm_not_configured"}; the app
 then falls back to its local logic and says so on screen.
 
@@ -51,17 +52,30 @@ _client: genai.Client | None = None
 def client() -> genai.Client:
     global _client
     if not settings.llm_configured:
-        raise LLMNotConfigured("AI_VERTEX_API_KEY / AI_VERTEX_PROJECT is not set")
+        raise LLMNotConfigured("AI_VERTEX_API_KEY is not set")
     if _client is None:
-        if settings.vertex_api_key:
-            # Vertex AI with an API key (express mode): the key decides the project, no ADC needed.
-            _client = genai.Client(vertexai=True, api_key=settings.vertex_api_key)
-        elif settings.vertex_project:
-            # Credentials come from Application Default Credentials (no API key), as in the Valamm AI gateway.
-            _client = genai.Client(vertexai=True, project=settings.vertex_project, location=settings.vertex_location)
-        else:
-            _client = genai.Client(api_key=settings.gemini_api_key)
+        _client = make_client()
     return _client
+
+
+def make_client() -> genai.Client:
+    """Vertex AI client authenticated by API key only.
+
+    With an api_key the SDK sends it as the x-goog-api-key header and skips google.auth
+    entirely, so ADC is never consulted. Passing project and location explicitly also stops
+    the SDK from picking up GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION from the environment.
+    """
+    if not settings.vertex_api_key:
+        raise LLMNotConfigured("AI_VERTEX_API_KEY is not set")
+    if settings.vertex_project:
+        return genai.Client(
+            vertexai=True,
+            api_key=settings.vertex_api_key,
+            project=settings.vertex_project,
+            location=settings.vertex_location or "global",
+        )
+    # Express mode: the key's own project, global endpoint.
+    return genai.Client(vertexai=True, api_key=settings.vertex_api_key)
 
 
 _REDIRECT = "vertexaisearch.cloud.google.com/grounding-api-redirect"
@@ -128,6 +142,24 @@ async def _generate(c: genai.Client, contents: list[Any], config: types.Generate
     raise last or RuntimeError("no answer")
 
 
+def _key_problem(e: errors.ClientError) -> str:
+    """Plain-language reason when Google rejects the API key (shown to users; never contains the key)."""
+    code = getattr(e, "code", 0) or 0
+    blob = json.dumps(getattr(e, "details", None) or {}) + " " + str(getattr(e, "message", "") or "")
+    if "API_KEY_INVALID" in blob or "API key not valid" in blob or "API key expired" in blob:
+        return "Google says AI_VERTEX_API_KEY is not valid or has expired. Create a new key and update the setting."
+    if "API_KEY_SERVICE_BLOCKED" in blob:
+        return "The API key is restricted and does not allow the Vertex AI API. Add it under the key's API restrictions."
+    if "API_KEY_IP_ADDRESS_BLOCKED" in blob or "API_KEY_HTTP_REFERRER_BLOCKED" in blob:
+        return "The API key has IP or website restrictions that block this server. Remove them for a server-side key."
+    if "SERVICE_DISABLED" in blob:
+        return "The Vertex AI API is not enabled on the Google Cloud project. Enable aiplatform.googleapis.com."
+    if "IAM_PERMISSION_DENIED" in blob or code in (401, 403):
+        return ("Vertex AI refused the API key: its account lacks permission (aiplatform.endpoints.predict). "
+                "Grant the Vertex AI User role on the project, and check AI_VERTEX_PROJECT matches the key's project.")
+    return ""
+
+
 def _text(resp: Any) -> str:
     try:
         return (resp.text or "").strip()
@@ -171,23 +203,19 @@ async def ask(
     except errors.ClientError as e:
         code = getattr(e, "code", 0)
         log.warning("Gemini client error %s: %s", code, e)
-        if code in (401, 403):
-            if settings.llm_auth == "vertex-key":
-                raise LLMError("Vertex AI refused the API key. Check AI_VERTEX_API_KEY and that its account has the Vertex AI User role.") from e
-            raise LLMError("Vertex AI refused the call. Check the Google login (gcloud auth application-default login) and the Vertex AI User role.") from e
+        hint = _key_problem(e)
+        if hint:
+            raise LLMError(hint) from e
         if code == 429:
             raise LLMError("The AI service is busy or over quota. Try again in a minute.") from e
         if code == 404:
-            raise LLMError(f"The model '{settings.llm_model}' is not available{'' if settings.vertex_api_key else ' in ' + settings.vertex_location}.") from e
+            raise LLMError(f"The model '{settings.llm_model}' is not available in {settings.vertex_location}.") from e
         raise LLMError(f"The AI service rejected the request ({code}).") from e
     except errors.APIError as e:
         log.warning("Gemini API error: %s", e)
         raise LLMError("The AI provider did not answer. Try again in a minute.") from e
     except Exception as e:
         log.warning("Gemini call failed: %r", e)
-        msg = str(e)
-        if "credentials" in msg.lower() or "default credentials" in msg.lower():
-            raise LLMError("No Google credentials on the server. Run: gcloud auth application-default login") from e
         raise LLMError("Could not reach the AI service.") from e
 
     text = _text(resp)

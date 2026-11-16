@@ -31,7 +31,12 @@ log = logging.getLogger("abhay")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    log.info("Database ready (%s). LLM: %s", "sqlite" if settings.is_sqlite else "postgresql", settings.llm_auth or "not configured")
+    log.info("Database ready (%s).", "sqlite" if settings.is_sqlite else "postgresql")
+    if settings.llm_configured:
+        log.info("AI: %s via Vertex AI API key (project %s, location %s).", settings.llm_model,
+                 settings.vertex_project or "from key", settings.vertex_location if settings.vertex_project else "global")
+    else:
+        log.warning("AI is OFF: AI_VERTEX_API_KEY is not set. AI endpoints answer 503 llm_not_configured.")
     yield
 
 

@@ -69,16 +69,16 @@ Or build once and let FastAPI serve everything at http://localhost:8000: `cd fro
 
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB      # Render PostgreSQL (external URL locally, internal URL on Render)
-AI_VERTEX_API_KEY=AQ....                              # Vertex AI API key; used first when set
+AI_VERTEX_API_KEY=AQ....                              # Vertex AI API key: the only AI credential (no ADC)
 AI_PROVIDER=gemini
 AI_DEFAULT_MODEL=gemini-2.5-flash
-AI_VERTEX_PROJECT=project-8ce5ae3e-81f4-4585-b74     # used with ADC only when no API key is set
+AI_VERTEX_PROJECT=project-8ce5ae3e-81f4-4585-b74     # project the calls go to (empty = the key's project)
 AI_VERTEX_LOCATION=asia-south1
 AI_TEMPERATURE=0.4
 LLM_WEB_SEARCH=true                                   # Google Search grounding
 ```
 
-AI credentials, in order: `AI_VERTEX_API_KEY` → `genai.Client(vertexai=True, api_key=...)` (no gcloud login, works on Render as a plain env var; the key's account needs the Vertex AI User role). Otherwise, as in `bts/AI_INTEGRATION.md`: `genai.Client(vertexai=True, project, location)` with Application Default Credentials. Locally run `gcloud auth application-default login` once with an account that has Vertex AI User on the project. If Google reports quota or "API not enabled": `gcloud auth application-default set-quota-project project-8ce5ae3e-81f4-4585-b74`.
+AI authenticates only with `AI_VERTEX_API_KEY`: `genai.Client(vertexai=True, api_key=..., project=AI_VERTEX_PROJECT, location=AI_VERTEX_LOCATION)` (or key only, when no project is set). Application Default Credentials are never used, so no gcloud login or credential file is needed, locally or on Render. Without the key AI is off (503 `llm_not_configured`). The key's account needs the Vertex AI User role on the project, and the Vertex AI API must be enabled.
 
 What uses the model: the company check for unknown companies, "Suggest more companies", **photo identification** (Gemini reads the logo and text, then confirms the company with Google Search; the result is cached as a company check), and the Market Insight Report (only after the token confirmation). Without AI the app still works and says so.
 

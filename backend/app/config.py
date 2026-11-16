@@ -50,14 +50,13 @@ def _origins() -> list[str]:
 @dataclass(frozen=True)
 class Settings:
     database_url: str = field(default_factory=_database_url)
-    # Gemini on Vertex AI (as in the Valamm AI gateway): project + location, credentials from ADC.
+    # Gemini on Vertex AI, authenticated with a Vertex AI API key. Application Default Credentials are never used.
     ai_provider: str = field(default_factory=lambda: (os.getenv("AI_PROVIDER") or "gemini").strip().lower())
+    # Server-side secret: never returned by any endpoint; repr=False keeps it out of logs and tracebacks.
+    vertex_api_key: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_API_KEY") or "").strip(), repr=False)
+    # Optional: route calls to this project and region. Empty project = the key's own project (express mode).
     vertex_project: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_PROJECT") or "").strip())
     vertex_location: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_LOCATION") or "global").strip())
-    # Vertex AI API key (express mode, "AQ." keys). When set it is used instead of project + ADC.
-    vertex_api_key: str = field(default_factory=lambda: (os.getenv("AI_VERTEX_API_KEY") or "").strip())
-    # Optional alternative: Gemini Developer API key (used only when no Vertex key or project is set)
-    gemini_api_key: str = field(default_factory=lambda: (os.getenv("GEMINI_API_KEY") or "").strip())
     llm_model: str = field(default_factory=lambda: (os.getenv("AI_DEFAULT_MODEL") or os.getenv("LLM_MODEL") or "gemini-2.5-flash").strip())
     temperature: float = field(default_factory=lambda: float(os.getenv("AI_TEMPERATURE") or 0.4))
     web_search: bool = field(default_factory=lambda: _bool("LLM_WEB_SEARCH", True))
@@ -71,16 +70,8 @@ class Settings:
 
     @property
     def llm_configured(self) -> bool:
-        return self.ai_provider == "gemini" and bool(self.vertex_api_key or self.vertex_project or self.gemini_api_key)
-
-    @property
-    def llm_auth(self) -> str:
-        """Which credentials the AI client uses: 'vertex-key', 'vertex-adc', 'gemini-key' or ''."""
-        if self.vertex_api_key:
-            return "vertex-key"
-        if self.vertex_project:
-            return "vertex-adc"
-        return "gemini-key" if self.gemini_api_key else ""
+        # AI is on only with an API key: no key means AI is off, never a fallback to ADC.
+        return self.ai_provider == "gemini" and bool(self.vertex_api_key)
 
     @property
     def is_sqlite(self) -> bool:
