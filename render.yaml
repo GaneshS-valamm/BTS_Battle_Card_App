@@ -1,0 +1,50 @@
+# Render Blueprint: one web service serves the API and the built React app.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: abhay
+    runtime: python
+    plan: starter
+    buildCommand: >-
+      cd frontend && npm ci && npm run build &&
+      cd ../backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: NODE_VERSION
+        value: 22.12.0
+      # PostgreSQL connection string: paste the database's INTERNAL URL in the Render dashboard
+      # (never commit it). Or replace with:
+      #   fromDatabase: { name: abhay-db, property: connectionString }
+      - key: DATABASE_URL
+        sync: false
+      # AI: Gemini on Vertex AI (see bts/AI_INTEGRATION.md)
+      - key: AI_PROVIDER
+        value: gemini
+      - key: AI_DEFAULT_MODEL
+        value: gemini-2.5-flash
+      - key: AI_VERTEX_PROJECT
+        value: project-8ce5ae3e-81f4-4585-b74
+      - key: AI_VERTEX_LOCATION
+        value: asia-south1
+      - key: AI_TEMPERATURE
+        value: "0.4"
+      # Render is not Google Cloud, so Vertex AI needs Google credentials here. Point this at a Render
+      # Secret File holding Google credentials (see README, "Vertex AI on Render").
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false
+      - key: LLM_WEB_SEARCH
+        value: "true"
+      - key: AI_RATE_LIMIT_PER_HOUR
+        value: "40"
+      # Optional shared team key; when set, the app asks for it once per device.
+      - key: APP_ACCESS_KEY
+        sync: false
+
+# Uncomment to let Render create the database too:
+# databases:
+#   - name: abhay-db
+#     plan: basic-256mb
+#     databaseName: abhay
