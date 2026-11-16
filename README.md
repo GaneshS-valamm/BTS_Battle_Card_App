@@ -88,6 +88,15 @@ The Market Insight Report is reachable from every screen (header button on inner
 
 Run the frontend with `npm run dev -- --host 0.0.0.0` and open `http://<PC Wi-Fi IP>:5173` on the phone. "Take a photo" opens the phone camera (`capture="environment"`). Allow Node.js through the Windows firewall if asked.
 
+### Separate frontend and backend on Render
+
+| Service | URL | Env var |
+|---|---|---|
+| Backend (web service) | https://bts-battle-card-app-backend.onrender.com | `FRONTEND_URL=https://bts-battle-card-app.onrender.com` (added to the CORS allow-list) |
+| Frontend (static site) | https://bts-battle-card-app.onrender.com | `VITE_API_URL=https://bts-battle-card-app-backend.onrender.com` (read at build time; redeploy after changing it) |
+
+The static site needs a rewrite rule `/*` → `/index.html` so page reloads work.
+
 ### Vertex AI on Render
 
 Simplest: set `AI_VERTEX_API_KEY` in the Render dashboard (it is `sync: false` in `render.yaml`). Without a key, Render is not Google Cloud, so there is no attached service account. Options: (1) a Workload Identity Federation credential file for Render, or (2) a service-account key file uploaded as a Render Secret File with `GOOGLE_APPLICATION_CREDENTIALS` pointing at it. The bts docs say the org policy forbids downloaded keys, so agree option 1 (or an exception) with whoever owns the Google project. Alternatively host the app on Cloud Run next to the Valamm AI gateway.

@@ -37,6 +37,16 @@ def _database_url() -> str:
     return url
 
 
+def _origins() -> list[str]:
+    raw = (os.getenv("CORS_ORIGINS") or "").split(",") + [os.getenv("FRONTEND_URL") or ""]
+    out: list[str] = []
+    for o in raw:
+        o = o.strip().rstrip("/")  # browsers send the origin without a trailing slash
+        if o and o not in out:
+            out.append(o)
+    return out
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str = field(default_factory=_database_url)
@@ -53,9 +63,8 @@ class Settings:
     web_search: bool = field(default_factory=lambda: _bool("LLM_WEB_SEARCH", True))
     ai_rate_limit_per_hour: int = field(default_factory=lambda: _int("AI_RATE_LIMIT_PER_HOUR", 40))
     app_access_key: str = field(default_factory=lambda: (os.getenv("APP_ACCESS_KEY") or "").strip())
-    cors_origins: list[str] = field(
-        default_factory=lambda: [o.strip() for o in (os.getenv("CORS_ORIGINS") or "").split(",") if o.strip()]
-    )
+    # Origins allowed to call the API: CORS_ORIGINS (comma-separated) plus FRONTEND_URL.
+    cors_origins: list[str] = field(default_factory=lambda: _origins())
     frontend_dist: Path = field(
         default_factory=lambda: Path(os.getenv("FRONTEND_DIST") or (BACKEND_DIR.parent / "frontend" / "dist"))
     )

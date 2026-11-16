@@ -43,6 +43,10 @@ services:
         value: "true"
       - key: AI_RATE_LIMIT_PER_HOUR
         value: "40"
+      # When the frontend is a separate Render static site: its origin, allowed by CORS.
+      # The static site itself needs VITE_API_URL=https://bts-battle-card-app-backend.onrender.com at build time.
+      - key: FRONTEND_URL
+        value: https://bts-battle-card-app.onrender.com
       # Optional shared team key; when set, the app asks for it once per device.
       - key: APP_ACCESS_KEY
         sync: false

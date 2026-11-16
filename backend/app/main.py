@@ -49,7 +49,9 @@ if settings.cors_origins:
 # ---------- guards ----------
 @app.middleware("http")
 async def access_key_guard(request: Request, call_next):
-    if settings.app_access_key and request.url.path.startswith("/api/") and request.url.path != "/api/health":
+    # CORS preflights (OPTIONS) never carry the key; let them through so the browser can send the real call.
+    if (settings.app_access_key and request.method != "OPTIONS"
+            and request.url.path.startswith("/api/") and request.url.path != "/api/health"):
         if request.headers.get("x-abhay-key") != settings.app_access_key:
             return JSONResponse({"error": "unauthorised", "detail": "Missing or wrong access key."}, status_code=401)
     return await call_next(request)
